@@ -75,14 +75,14 @@ function outputResults() {
       // [doc index, relevance] -- not zero-indexed anymore!
       mostRelevantDocumentsForQuery[k] = [k + 1, unsortedDocumentRelevancesForQuery[k]]
     }
-    console.log("")
-    console.log("%%% mostRelevantDocumentsForQuery before sorting:", mostRelevantDocumentsForQuery)
+    // console.log("")
+    // console.log("%%% mostRelevantDocumentsForQuery before sorting:", mostRelevantDocumentsForQuery)
 
     mostRelevantDocumentsForQuery.sort((a, b) => {
       return b[1] - a[1] // sorting by value, which is at index 1
     })
 
-    console.log("%%% mostRelevantDocumentsForQuery after sorting:", mostRelevantDocumentsForQuery)
+    // console.log("%%% mostRelevantDocumentsForQuery after sorting:", mostRelevantDocumentsForQuery)
 
     const output = []
     // print sorted document indices (1-indexed) for up to 5 most relevant documents (if not zero!)
@@ -93,8 +93,8 @@ function outputResults() {
       output.push(mostRelevantDocumentsForQuery[l][0])
     }
 
-    console.log("")
-    console.log("!!!!! OUTPUT:")
+    // console.log("")
+    // console.log("!!!!! OUTPUT:")
     console.log(output.join(' '))
   }
 }
@@ -130,39 +130,6 @@ function outputResults() {
 
 // console.log(documentRelevances)
 
-// // sort the documentRelevances arrays for each query
-// for (let j = 0; j < numberOfQueries; j++) {
-//   // const mostRelevantDocumentsForQuery = Object.assign({}, documentRelevances[j])
-//   // console.log(mostRelevantDocumentsForQuery)
-//   const mostRelevantDocumentsForQuery = new Array(numberOfDocuments)
-//   const unsortedDocumentRelevancesForQuery = documentRelevances[j]
-//   for (let k = 0; k < numberOfDocuments; k++) {
-//     // [doc index, relevance] -- not zero-indexed anymore!
-//     mostRelevantDocumentsForQuery[k] = [k + 1, unsortedDocumentRelevancesForQuery[k]]
-//   }
-//   console.log("")
-//   console.log("%%% mostRelevantDocumentsForQuery before sorting:", mostRelevantDocumentsForQuery)
-
-//   mostRelevantDocumentsForQuery.sort((a, b) => {
-//     return b[1] - a[1] // sorting by value, which is at index 1
-//   })
-
-//   console.log("%%% mostRelevantDocumentsForQuery after sorting:", mostRelevantDocumentsForQuery)
-
-//   const output = []
-//   // print sorted document indices (1-indexed) for up to 5 most relevant documents (if not zero!)
-//   for (let l = 0; l < 5; l++) {
-//     if (mostRelevantDocumentsForQuery[l][1] == 0) { // if value is zero, break out of the loop
-//       break
-//     }
-//     output.push(mostRelevantDocumentsForQuery[l][0])
-//   }
-
-//   console.log("")
-//   console.log("!!!!! OUTPUT:")
-//   console.log(output.join(' '))
-// }
-
 ////
 
 function calculateRelevance() {
@@ -171,31 +138,31 @@ function calculateRelevance() {
   for (let h = 0; h < numberOfQueries; h++) {
     documentRelevances[h] = new Array(numberOfDocuments).fill(0)
   }
-  console.log("initial documentRelevances:", documentRelevances)
+  // console.log("initial documentRelevances:", documentRelevances)
 
   for (let i = 0; i < numberOfQueries; i++) { // iterate over all queries
 
-    console.log("query number", i, ":", queries[i])
+    // console.log("query number", i, ":", queries[i])
 
     const queryArray = queries[i].split(' ')
     const queryArraySorted = queryArray.sort((a, b) => b.length - a.length) // THINK ABOUT REPEATED WORDS TOO! 
     // ELIMINATE THEM FROM THE QUERY?
 
-    console.log("queryArraySorted", queryArraySorted)
+    // console.log("queryArraySorted", queryArraySorted)
 
     for (let j = 0; j < numberOfDocuments; j++) { // for each query, go thru all documents in the search index
 
-      console.log("checking doc #", j, ":", documentsAsArrays[j])
+      // console.log("checking doc #", j, ":", documentsAsArrays[j])
 
       queryArraySorted.forEach(word => { // for each document, iterate over all words in the query 
-        console.log("")
-        console.log("** checking word:", word.toUpperCase())
-        console.log("")
+        // console.log("")
+        // console.log("** checking word:", word.toUpperCase())
+        // console.log("")
 
         const wordHash = hash(word)
         const searchIndexForDoc = searchIndex[j]
-        console.log("  in searchIndexForDoc:", searchIndexForDoc)
-        console.log("")
+        // console.log("  in searchIndexForDoc:", searchIndexForDoc)
+        // console.log("")
 
         // console.log("  ^^^ sanity check - hash for coffee:", hash("coffee"))
         // console.log("  ^^^ current word:", word)
@@ -205,30 +172,31 @@ function calculateRelevance() {
         const htSize = Math.round(searchIndexForDoc.length)
         // console.log("  ^^^ current htSize:", htSize)
         const wordLookupIndex = wordHash % htSize
-        console.log("    wordLookupIndex:", wordLookupIndex)
-        console.log("")
+        // console.log("    wordLookupIndex:", wordLookupIndex)
+        // console.log("")
 
 
         const wordIndicesInSearchIndex = searchIndexForDoc[wordLookupIndex]
 
         if (wordIndicesInSearchIndex != null) {
-          console.log("      wordIndicesInSearchIndex:", wordIndicesInSearchIndex)
+          // console.log("      wordIndicesInSearchIndex:", wordIndicesInSearchIndex)
           wordIndicesInSearchIndex.forEach(wordIndex => {
-            console.log("      checking wordIndex:", wordIndex)
-            console.log("      documentsAsArrays[j][wordIndex]:", documentsAsArrays[j][wordIndex])
+            // console.log("      checking wordIndex:", wordIndex)
+            // console.log("      documentsAsArrays[j][wordIndex]:", documentsAsArrays[j][wordIndex])
             if (documentsAsArrays[j][wordIndex] == word) {
-              console.log("        documentsAsArrays[j][wordIndex] == word")
-              console.log("        *** before update documentRelevances:", JSON.stringify(documentRelevances))
+              // console.log("        documentsAsArrays[j][wordIndex] == word")
+              // console.log("        *** before update documentRelevances:", JSON.stringify(documentRelevances))
 
-              console.log("         adding 1 to documentRelevances[", i, "]", "[", j, "]")
+              // console.log("         adding 1 to documentRelevances[", i, "]", "[", j, "]")
               documentRelevances[i][j] += 1
 
-              console.log("        *** updated documentRelevances:", JSON.stringify(documentRelevances))
+              // console.log("        *** updated documentRelevances:", JSON.stringify(documentRelevances))
             }
           })
-        } else {
-          console.log("      nothing found")
         }
+        // else {
+        //   console.log("      nothing found")
+        // }
 
       })
     }
@@ -245,7 +213,7 @@ function createSearchIndex() {
     searchIndex[i] = documentHashTable
   }
 
-  console.log("searchIndex:", searchIndex)
+  // console.log("searchIndex:", searchIndex)
 
 }
 
