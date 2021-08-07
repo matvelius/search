@@ -1,10 +1,10 @@
 const { exit } = require('process');
-// let readline = require('readline');
-// let rl = readline.createInterface({
-//   input: process.stdin,
-//   output: process.stdout,
-//   terminal: false
-// });
+let readline = require('readline');
+let rl = readline.createInterface({
+  input: process.stdin,
+  output: process.stdout,
+  terminal: false
+});
 
 let lineIndex = 0
 let numberOfDocuments = 0
@@ -12,59 +12,92 @@ let documents = []
 let documentsAsArrays = []
 let numberOfQueries = 0
 let queries = []
-let queriesRelevance = [] // DELETE
 
 let searchIndex = null
 
 let documentRelevances = []
 
 
-// rl.on('line', function (line) {
+rl.on('line', function (line) {
 
-//   if (lineIndex == 0) {
+  if (lineIndex == 0) {
 
-//     numberOfDocuments = parseInt(line)
+    numberOfDocuments = parseInt(line)
 
-//   } else if (lineIndex <= numberOfDocuments) {
+  } else if (lineIndex <= numberOfDocuments) { // fill the documents array
 
-//     documents.push(line)
+    documents.push(line)
 
-//   } else if (lineIndex == numberOfDocuments + 1) {
+  } else if (lineIndex == numberOfDocuments + 1) {
 
-//     numberOfQueries = parseInt(line)
+    numberOfQueries = parseInt(line)
 
-//     queriesRelevance = new Array(numberOfQueries).fill(0)
+    // convert documents array of lines to arrays
+    documentsAsArrays = new Array(numberOfDocuments)
 
-//     documentsAsArrays = new Array(numberOfDocuments)
+    for (let i = 0; i < numberOfDocuments; i++) {
+      documentsAsArrays[i] = documents[i].split(' ')
+    }
 
-//     for (let i = 0; i < numberOfDocuments; i++) {
-//       documentsAsArrays[i] = documents[i].split(' ')
-//     }
+    createSearchIndex()
 
-//     createSearchIndex()
+    // console.log(searchIndex)
 
-//     console.log(searchIndex)
+  } else if (lineIndex <= numberOfDocuments + numberOfQueries) { // fill the queries array
 
-//   } else if (lineIndex <= numberOfDocuments + numberOfQueries) {
+    queries.push(line)
 
-//     queries.push(line)
+  } else {
 
-//   } else {
+    queries.push(line)
 
-//     queries.push(line)
+    calculateRelevance()
 
-//     calculateRelevance()
+    outputResults()
 
-//     console.log(queriesRelevance)
+    rl.close()
+    exit(0)
 
-//     rl.close()
-//     exit(0)
+  }
 
-//   }
+  lineIndex += 1
 
-//   lineIndex += 1
+})
 
-// })
+function outputResults() {
+  // sort the documentRelevances arrays for each query
+  for (let j = 0; j < numberOfQueries; j++) {
+
+    const mostRelevantDocumentsForQuery = new Array(numberOfDocuments)
+    const unsortedDocumentRelevancesForQuery = documentRelevances[j]
+
+    for (let k = 0; k < numberOfDocuments; k++) {
+      // [doc index, relevance] -- not zero-indexed anymore!
+      mostRelevantDocumentsForQuery[k] = [k + 1, unsortedDocumentRelevancesForQuery[k]]
+    }
+    console.log("")
+    console.log("%%% mostRelevantDocumentsForQuery before sorting:", mostRelevantDocumentsForQuery)
+
+    mostRelevantDocumentsForQuery.sort((a, b) => {
+      return b[1] - a[1] // sorting by value, which is at index 1
+    })
+
+    console.log("%%% mostRelevantDocumentsForQuery after sorting:", mostRelevantDocumentsForQuery)
+
+    const output = []
+    // print sorted document indices (1-indexed) for up to 5 most relevant documents (if not zero!)
+    for (let l = 0; l < 5; l++) {
+      if (mostRelevantDocumentsForQuery[l][1] == 0) { // if value is zero, break out of the loop
+        break
+      }
+      output.push(mostRelevantDocumentsForQuery[l][0])
+    }
+
+    console.log("")
+    console.log("!!!!! OUTPUT:")
+    console.log(output.join(' '))
+  }
+}
 
 
 //// for testing: 
@@ -79,57 +112,56 @@ let documentRelevances = []
 // numberOfQueries = 3
 // queries = ["i like black coffee without milk", "everyone loves new year", "mary likes black coffee without milk"]
 
-numberOfDocuments = 6
-documents = ["buy flat in moscow", "rent flat in moscow", "sell flat in moscow", "want flat in moscow like crazy", "clean flat in moscow on weekends", "renovate flat in moscow"]
-numberOfQueries = 1
-queries = ["flat in moscow for crazy weekends"]
+// numberOfDocuments = 6
+// documents = ["buy flat in moscow", "rent flat in moscow", "sell flat in moscow", "want flat in moscow like crazy", "clean flat in moscow on weekends", "renovate flat in moscow"]
+// numberOfQueries = 1
+// queries = ["flat in moscow for crazy weekends"]
 
-queriesRelevance = new Array(numberOfQueries).fill(0)
 
-documentsAsArrays = new Array(numberOfDocuments)
+// documentsAsArrays = new Array(numberOfDocuments)
 
-for (let i = 0; i < numberOfDocuments; i++) {
-  documentsAsArrays[i] = documents[i].split(' ')
-}
+// for (let i = 0; i < numberOfDocuments; i++) {
+//   documentsAsArrays[i] = documents[i].split(' ')
+// }
 
-createSearchIndex()
+// createSearchIndex()
 
-calculateRelevance()
+// calculateRelevance()
 
-console.log(documentRelevances)
+// console.log(documentRelevances)
 
-// sort the documentRelevances arrays for each query
-for (let j = 0; j < numberOfQueries; j++) {
-  // const mostRelevantDocumentsForQuery = Object.assign({}, documentRelevances[j])
-  // console.log(mostRelevantDocumentsForQuery)
-  const mostRelevantDocumentsForQuery = new Array(numberOfDocuments)
-  const unsortedDocumentRelevancesForQuery = documentRelevances[j]
-  for (let k = 0; k < numberOfDocuments; k++) {
-    // [doc index, relevance] -- not zero-indexed anymore!
-    mostRelevantDocumentsForQuery[k] = [k + 1, unsortedDocumentRelevancesForQuery[k]]
-  }
-  console.log("")
-  console.log("%%% mostRelevantDocumentsForQuery before sorting:", mostRelevantDocumentsForQuery)
+// // sort the documentRelevances arrays for each query
+// for (let j = 0; j < numberOfQueries; j++) {
+//   // const mostRelevantDocumentsForQuery = Object.assign({}, documentRelevances[j])
+//   // console.log(mostRelevantDocumentsForQuery)
+//   const mostRelevantDocumentsForQuery = new Array(numberOfDocuments)
+//   const unsortedDocumentRelevancesForQuery = documentRelevances[j]
+//   for (let k = 0; k < numberOfDocuments; k++) {
+//     // [doc index, relevance] -- not zero-indexed anymore!
+//     mostRelevantDocumentsForQuery[k] = [k + 1, unsortedDocumentRelevancesForQuery[k]]
+//   }
+//   console.log("")
+//   console.log("%%% mostRelevantDocumentsForQuery before sorting:", mostRelevantDocumentsForQuery)
 
-  mostRelevantDocumentsForQuery.sort((a, b) => {
-    return b[1] - a[1] // sorting by value, which is at index 1
-  })
+//   mostRelevantDocumentsForQuery.sort((a, b) => {
+//     return b[1] - a[1] // sorting by value, which is at index 1
+//   })
 
-  console.log("%%% mostRelevantDocumentsForQuery after sorting:", mostRelevantDocumentsForQuery)
+//   console.log("%%% mostRelevantDocumentsForQuery after sorting:", mostRelevantDocumentsForQuery)
 
-  const output = []
-  // print sorted document indices (1-indexed) for up to 5 most relevant documents (if not zero!)
-  for (let l = 0; l < 5; l++) {
-    if (mostRelevantDocumentsForQuery[l][1] == 0) { // if value is zero, break out of the loop
-      break
-    }
-    output.push(mostRelevantDocumentsForQuery[l][0])
-  }
+//   const output = []
+//   // print sorted document indices (1-indexed) for up to 5 most relevant documents (if not zero!)
+//   for (let l = 0; l < 5; l++) {
+//     if (mostRelevantDocumentsForQuery[l][1] == 0) { // if value is zero, break out of the loop
+//       break
+//     }
+//     output.push(mostRelevantDocumentsForQuery[l][0])
+//   }
 
-  console.log("")
-  console.log("!!!!! OUTPUT:")
-  console.log(output.join(' '))
-}
+//   console.log("")
+//   console.log("!!!!! OUTPUT:")
+//   console.log(output.join(' '))
+// }
 
 ////
 
