@@ -144,7 +144,7 @@ function outputResults() {
 
 // outputResults()
 
-// ////
+// //
 
 function calculateRelevance() {
 
