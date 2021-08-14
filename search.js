@@ -1,4 +1,4 @@
-// ID успешной посылки: 52322026
+// ID успешной посылки: 52347256
 
 // ПРИНЦИП РАБОТЫ
 
@@ -32,11 +32,14 @@
 
 // ВРЕМЕННАЯ СЛОЖНОСТЬ
 
-// O(1)
+// Подготовка данных: O(n), так как мы должны обойти все документы 2 раза
+
+// Ответ на запрос: O(1), потому что благодаря подготовке данных, кол-во документов которые 
+// нужно требуется обойти сильно снижается, а извлечение из хеш-таблицы происходит мгновенно 
 
 // ПРОСТРАНСТВЕННАЯ СЛОЖНОСТЬ
 
-// O(n)
+// O(n), так как мы просто храним все данные и запросы посутпающие не вход
 
 const { exit } = require('process');
 let readline = require('readline');
@@ -102,9 +105,8 @@ function addDocument(line, documentIndex) {
 
 // word -> documents which contain it
 function fillWordsInDocumentsHashTable(documentArray, documentIndex) {
-  for (let i = 0; i < documentArray.length; i++) {
-    const word = documentArray[i]
-    if (wordsInDocumentsHashTable.get(word) == null) { // if this is the 1st time we encounter this word
+  for (const word of documentArray) {
+    if (!wordsInDocumentsHashTable.has(word)) { // if this is the 1st time we encounter this word
       const documentIDSet = new Set()
       documentIDSet.add(documentIndex)
       wordsInDocumentsHashTable.set(word, documentIDSet)
@@ -118,9 +120,8 @@ function fillWordsInDocumentsHashTable(documentArray, documentIndex) {
 // word -> number of times it occurs in a specific document
 function getWordOccurencesInDocumentHashTable(documentArray) {
   const wordOccurencesInDocumentHashTable = new Map()
-  for (let i = 0; i < documentArray.length; i++) {
-    const word = documentArray[i]
-    if (wordOccurencesInDocumentHashTable.get(word) == null) { // if this is the 1st time we encounter this word
+  for (const word of documentArray) {
+    if (!wordOccurencesInDocumentHashTable.has(word)) { // if this is the 1st time we encounter this word
       wordOccurencesInDocumentHashTable.set(word, 1)
     } else { // this word was already mapped previously and we just need to increment the count
       wordOccurencesInDocumentHashTable.set(word, wordOccurencesInDocumentHashTable.get(word) + 1)
@@ -140,14 +141,14 @@ function calculateRelevance() {
 
     const relevantDocuments = new Map()
 
-    for (word of uniqueQueryWords) {
+    for (const word of uniqueQueryWords) {
       const documentsWhichContainWord = wordsInDocumentsHashTable.get(word)
       // continue to next word if the current word doesn't exist in any of the documents
       if (documentsWhichContainWord == null) {
         continue
       }
 
-      for (documentIndex of documentsWhichContainWord) {
+      for (const documentIndex of documentsWhichContainWord) {
         const numberOfOccurences = wordOccurences[documentIndex].get(word)
         const currentRelevanceOfDocument = relevantDocuments.get(documentIndex)
         if (currentRelevanceOfDocument == null) { // if this is the 1st time we set relevance of this document
